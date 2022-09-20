@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>리뷰 관련 쿼리문들</comment>
+	
+	<entry key="insertReview">
+	INSERT INTO REVIEW (REVIEW_NO, REVIEW_BOOK, REVIEW_WRITER, REVIEW_TITLE, REVIEW_CONTENT, REVIEW_SCOPE, REVIEW_DATE, COUNT, STATUS)
+ VALUES (SEQ_RVNO.NEXTVAL, ?, ?, ?, ?, ?, SYSDATE, 0, 'Y')
+	</entry>
+	
+	<entry key = "selectReviewB">
+	
+	
+  SELECT USER_ID, REVIEW_CONTENT, REVIEW_SCOPE, REVIEW_DATE, COUNT, REVIEW_TITLE, REVIEW_NO
+		FROM (
+			SELECT ROWNUM RNUM, A.* 
+			FROM(
+    			SELECT USER_ID, REVIEW_CONTENT, REVIEW_SCOPE, REVIEW_DATE, R.COUNT, REVIEW_TITLE, REVIEW_NO
+    			FROM BOOK B
+    			JOIN REVIEW R ON B.BOOK_NO = R.REVIEW_BOOK
+                JOIN MEMBER M ON R.REVIEW_WRITER = M.USER_NO
+    			WHERE  R.STATUS = 'Y' AND B.BOOK_NO = ?
+    			ORDER 
+        			BY REVIEW_NO DESC) A)
+ 		WHERE
+ 			RNUM BETWEEN ? AND ?
+	
+	</entry>
+	
+	<entry key = "selectListCount">
+	
+	SELECT COUNT(*) COUNT
+  	FROM REVIEW
+  	WHERE REVIEW_BOOK = ?
+  	
+	</entry>
+	
+	<entry key="selectReview">
+		SELECT REVIEW_NO, REVIEW_BOOK, REVIEW_WRITER, USER_ID, REVIEW_TITLE, REVIEW_CONTENT, REVIEW_SCOPE, REVIEW_DATE, COUNT
+		FROM REVIEW
+		JOIN MEMBER ON (USER_NO = REVIEW_WRITER)
+		WHERE REVIEW_NO = ?
+	</entry>
+	
+	<entry key="increaseReviewCount">
+		UPDATE REVIEW
+		    SET COUNT = COUNT + 1
+		 WHERE REVIEW_NO = ?
+		    AND STATUS = 'Y'
+	</entry>
+	
+	<entry key = "reviewCount">
+	
+	SELECT COUNT(*) COUNT
+  	FROM REVIEW
+  	WHERE STATUS = 'Y'
+  	
+	</entry>
+	
+	<entry key="updateReview">
+	      UPDATE REVIEW 
+      SET REVIEW_TITLE = ?,
+          REVIEW_CONTENT = ?,
+          REVIEW_SCOPE = ?,
+          REVIEW_DATE = SYSDATE
+      WHERE REVIEW_NO = ?
+	</entry>
+	
+</properties>

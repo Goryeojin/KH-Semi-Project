@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>회원 관련 쿼리문들</comment>
+	
+	<entry key="loginMember">
+		SELECT * 
+		FROM MEMBER 
+		WHERE USER_ID = ? 
+		 AND USER_PWD = ? 
+		 AND STATUS = 'Y'
+	</entry>
+	
+	<entry key="insertMember">
+	INSERT
+		 INTO MEMBER
+		 		(
+		 		USER_NO
+		 		, USER_ID
+		 		, USER_PWD
+		 		, USER_NAME
+		 		, EMAIL
+		 		, GENDER
+				, BIRTH
+				, ENROLL_DATE
+				, STATUS
+				, EVENT_ASSENT
+				, INFO_ASSENT
+				, REVIEW_COUNT
+				, POINT
+		 		)
+          VALUES
+          		(
+          		SEQ_UNO.NEXTVAL
+          		, ?
+          		, ?
+          		, ?
+          		, ?
+          		, ?
+          		, ?
+          		, SYSDATE
+          		, 'Y'
+          		, ?
+          		, ?
+          		, 0
+          		, 0
+          		)
+	</entry>
+	<!-- 미라 -->
+	<entry key="updateMember">
+	UPDATE MEMBER
+		SET USER_NAME=?, EMAIL=?, GENDER=?, 
+			BIRTH=?, EVENT_ASSENT=?, INFO_ASSENT=?
+	WHERE USER_ID = ?
+	</entry>
+	
+	<entry key="selectMember">
+		SELECT *
+		 FROM
+		 	 MEMBER
+		 WHERE
+		 	 USER_ID = ?
+		 AND
+		 	 STATUS = 'Y'
+	</entry>
+	
+	<entry key="updatePwdMember">
+		UPDATE
+			 MEMBER 
+    	SET 
+    		USER_PWD = ? 
+		WHERE 
+			USER_PWD = ? 
+		 AND 
+		 	USER_ID = ?
+	</entry>
+	
+	<entry key="deleteMember">
+		UPDATE
+	        MEMBER
+	    SET
+	        STATUS = 'N'
+		WHERE USER_ID = ?
+		 AND USER_PWD = ?
+	</entry>
+	
+	<entry key="selectWishCount">
+SELECT USER_NO, USER_NAME, USER_ID, EMAIL, POINT, BIRTH,
+        (SELECT COUNT(REVIEW_WRITER)
+            FROM REVIEW
+            WHERE STATUS = 'Y'
+             AND REVIEW_WRITER = ?) REVIEW_COUNT
+        ,
+        (SELECT COUNT(STATUS)
+            FROM WISHLIST
+            WHERE STATUS = 'Y'
+             AND USER_NO = ?) WISH
+FROM MEMBER
+GROUP BY USER_NO, USER_NAME, USER_ID, EMAIL, POINT, BIRTH
+HAVING USER_NO = ?
+	</entry>
+	
+	
+	<!-- 은비 -->
+	
+		<entry key="idSearchMember">
+	SELECT
+		USER_ID
+	FROM
+		MEMBER
+	WHERE
+		EMAIL = ?
+	AND
+		STATUS = 'Y' 
+	</entry>
+	
+	<entry key="pwdResetMember">
+	UPDATE 
+		MEMBER
+	SET
+		USER_PWD = ?
+	WHERE
+		USER_ID = ?
+	AND
+		EMAIL = ?
+	
+	</entry>
+	
+	<entry key="idCheck">
+	SELECT 
+		COUNT(*)
+	FROM
+		MEMBER
+	WHERE USER_ID = ?
+	
+	</entry>
+	
+	<entry key="emailCheck">
+	SELECT
+		COUNT(*)
+	FROM 
+		MEMBER
+	WHERE EMAIL = ?
+	
+	</entry>
+	
+	<entry key="memberLogin">
+	SELECT 
+		EMAIL
+	FROM
+		MEMBER
+	WHERE USER_ID = ?
+	
+	</entry>	
+	
+	<entry key="pwdResetMember">
+	UPDATE 
+		MEMBER
+	SET
+		USER_PWD = ?
+	WHERE
+		USER_ID = ?
+	</entry>
+	
+	<entry key="increaseReviewCount">
+	    UPDATE MEMBER
+	    SET REVIEW_COUNT = REVIEW_COUNT + 1
+	    WHERE USER_NO = ?
+	</entry>
+	
+  <!-- 윤희 구역 시작 -->
+
+   <!-- 마이 리스트 -->
+   <entry key="findAllWishlist">
+       SELECT BOOK_NO, USER_NO, STATUS, BOOK_AUTHOR, BOOK_INTRO
+            , BOOK_PUBLISHER, BOOK_SUMMARY, BOOK_TITLE, GNERE_NO, REVIEW_COUNT
+        FROM (
+            SELECT ROWNUM RNUM, A.* 
+        FROM (
+        SELECT BOOK_NO, USER_NO, STATUS, BOOK_AUTHOR, BOOK_INTRO
+            , BOOK_PUBLISHER, BOOK_SUMMARY, BOOK_TITLE, GNERE_NO, REVIEW_COUNT
+      FROM WISHLIST W
+      JOIN BOOK B USING(BOOK_NO)
+      WHERE W.STATUS = 'Y'
+      AND USER_NO = ?
+      ORDER BY BOOK_NO DESC) A)
+         WHERE RNUM BETWEEN ? AND ?
+   </entry>
+
+   <entry key="searchWishlist">
+      SELECT
+      a.book_no,
+      a.user_no,
+      a.status,
+      b.book_author,
+      b.book_intro,
+      b.book_publisher,
+      b.book_summary,
+      b.book_title,
+      b.gnere_no,
+      b.review_count
+      FROM WISHLIST A
+      JOIN BOOK B ON a.book_no = b.book_no
+      where
+      a.user_no = ? and b.book_title like ?
+   </entry>
+
+
+   <!-- 리뷰 -->
+
+   <entry key="findAllReviews">
+       SELECT REVIEW_CONTENT, REVIEW_WRITER, REVIEW_SCOPE, REVIEW_NO, BOOK_NO
+        FROM (
+            SELECT ROWNUM RNUM, A.* 
+        FROM (
+        SELECT REVIEW_CONTENT, REVIEW_WRITER, REVIEW_SCOPE, REVIEW_NO, BOOK_NO
+      FROM REVIEW
+      JOIN BOOK ON (REVIEW_BOOK = BOOK_NO)
+      WHERE STATUS = 'Y'
+       AND REVIEW_WRITER = ?
+      ORDER BY REVIEW_NO DESC) A)
+         WHERE RNUM BETWEEN ? AND ?
+   </entry>
+
+   <entry key="deleteReviews">
+		UPDATE REVIEW SET STATUS = 'N'
+		WHERE REVIEW_NO = ?
+   </entry>
+
+
+
+   <!-- 통계 -->
+
+   <entry key="getStatistics">
+
+      select
+      aaa.book_count,
+      aaa.gnere_no,
+      bbb.gnere_name
+      from (
+      select
+      count(*) as book_count,
+      bb.gnere_no
+      from (
+      select
+      count(*) as
+      review_count,
+      b.book_no
+      from review a
+      join book b on a.review_book =
+      b.book_no
+      where a.review_writer=? and a.review_date BETWEEN TO_DATE(?,
+      'YYYYMMDD')
+      AND TO_DATE(?)
+      group by b.book_no
+      )aa
+      join book bb on
+      aa.book_no = bb.book_no
+      group by bb.gnere_no
+      order by book_count desc
+      )
+      aaa
+      join gnere bbb on aaa.gnere_no = bbb.gnere_no
+
+   </entry>
+
+   <!--중고 나라 -->
+   <entry key="findAllFleaMarket">
+       SELECT FLEA_NO, FLEA_TITLE, FLEA_STATUS, FLEA_PRICE, FLEA_DATE, FLEA_TYPE
+        FROM (
+            SELECT ROWNUM RNUM, A.* 
+        FROM (
+        SELECT FLEA_NO, FLEA_TITLE, FLEA_STATUS, FLEA_PRICE, FLEA_DATE, FLEA_TYPE
+      FROM FLEA_MARKET
+      WHERE FLEA_STATUS = 'Y'
+      AND FLEA_WRITER = ?
+      ORDER BY FLEA_NO DESC) A)
+         WHERE RNUM BETWEEN ? AND ?
+   </entry>
+
+   <entry key="findCountFleaMarketReply">
+      SELECT
+      count(*) as count
+      -- reply_writer as count
+      from REPLY
+      where reply_fno=?
+   </entry>
+
+
+   <entry key="deleteFleaMarket">
+       UPDATE FLEA_MARKET SET FLEA_STATUS = 'N'
+       WHERE FLEA_NO = ?
+   </entry>
+
+
+   <!-- 윤희 구역 끝 -->
+   
+	<!-- 대송이 -->
+	
+	<entry key="selectQuestionList">
+	 
+    SELECT Q_NO, Q_DATE, Q_TITLE, STATUS     
+     FROM (     
+       SELECT ROWNUM RNUM, A.*   
+        FROM (
+        SELECT Q_NO, Q_DATE, Q_TITLE, STATUS
+      FROM QUESTION
+        WHERE Q_WRITER = ?
+        ORDER BY Q_NO) A)
+        WHERE RNUM BETWEEN ? AND ?
+
+	
+	</entry>
+
+	
+	<entry key="MyPageInquiry">
+	
+	INSERT INTO QUESTION (Q_NO, Q_WRITER, Q_TITLE, Q_CONTENT)  
+    VALUES(SEQ_QNO.NEXTVAL, ?, ?, ?)  
+	
+	</entry>
+	
+	<entry key="selectQuestion">
+	
+		SELECT 
+			Q_NO
+			, Q_TITLE
+			, Q_CONTENT
+			, Q_DATE
+			, Q_ANSWER
+			, STATUS
+	FROM QUESTION
+		WHERE
+			STATUS = 'Y'
+   AND			Q_NO = ?
+
+	</entry>
+	
+	<entry key="deleteQuestion">
+	
+	   DELETE FROM QUESTION
+   WHERE Q_NO = ?
+	
+	</entry>
+	
+	<entry key="selectRequestList">
+	
+     SELECT REQUEST_NO, REQUEST_DATE, REQUEST_TITLE, REQUEST_CONTENT, STATUS
+   FROM  (
+   SELECT ROWNUM RNUM, A.*
+    FROM (
+    SELECT REQUEST_NO, REQUEST_DATE, REQUEST_TITLE, REQUEST_CONTENT, STATUS
+   FROM REQUEST
+   WHERE REQUEST_WRITER = ?
+   ORDER BY REQUEST_NO) A)
+   WHERE RNUM BETWEEN ? AND ?
+
+	
+	
+	</entry>
+	
+	   <entry key = "RequestBookselectListCount">
+   
+   SELECT COUNT(*) COUNT
+     FROM REQUEST
+     WHERE REQUEST_WRITER = ?
+
+    
+   </entry>
+	
+	<entry key="RequestInquiryselectListCount">
+	
+	   
+    SELECT COUNT(*) COUNT
+     FROM QUESTION
+     WHERE Q_WRITER = ?
+
+	
+	</entry>
+	
+	<!-- 여기부터는 조심히 쓰기~ -->
+   <entry key = "selectFleaCount">
+   
+     SELECT COUNT(*) COUNT
+     FROM FLEA_MARKET
+     WHERE FLEA_WRITER = ?
+    
+   </entry>
+   <entry key = "selectReviewCount">
+   
+     SELECT COUNT(*) COUNT
+     FROM REVIEW
+     WHERE REVIEW_WRITER = ?
+      AND STATUS = 'Y'
+    
+   </entry>
+   <entry key = "selectMyBookCount">
+   
+     SELECT COUNT(*) COUNT
+     FROM WISHLIST
+     WHERE USER_NO = ?
+    
+   </entry>
+	
+	
+</properties>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>리뷰 관련 쿼리문들</comment>
+	
+	<entry key="selectFleaMarketSellList">
+SELECT FLEA_NO, FLEA_TITLE, USER_ID, FLEA_PRICE, "TITLEIMG"
+        FROM (
+            SELECT ROWNUM RNUM, A.* 
+        FROM (
+        SELECT FLEA_NO, FLEA_TITLE, USER_ID, FLEA_PRICE, FILE_PATH||CHANGE_NAME "TITLEIMG"
+      FROM FLEA_MARKET F
+		  JOIN ATTACHMENT ON (FLEA_NO = REF_FNO)
+          JOIN MEMBER ON (FLEA_WRITER = USER_NO)
+      WHERE FLEA_STATUS = 'Y'
+       AND FLEA_TYPE = 1
+      ORDER BY FLEA_NO DESC) A)
+         WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectFleaMarketBuyList">
+SELECT FLEA_NO, FLEA_TITLE, USER_ID, FLEA_PRICE, "TITLEIMG"
+        FROM (
+            SELECT ROWNUM RNUM, A.* 
+        FROM (
+        SELECT FLEA_NO, FLEA_TITLE, USER_ID, FLEA_PRICE, FILE_PATH||CHANGE_NAME "TITLEIMG"
+      FROM FLEA_MARKET F
+		  JOIN ATTACHMENT ON (FLEA_NO = REF_FNO)
+          JOIN MEMBER ON (FLEA_WRITER = USER_NO)
+      WHERE FLEA_STATUS = 'Y'
+       AND FLEA_TYPE = 2
+      ORDER BY FLEA_NO DESC) A)
+         WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="insertFleaMarket">
+		INSERT INTO FLEA_MARKET(FLEA_NO, FLEA_WRITER, FLEA_TITLE, FLEA_CONTENT, FLEA_DATE, FLEA_TYPE, FLEA_PRICE, FLEA_STATUS)
+		VALUES(SEQ_FNO.NEXTVAL, ?, ?, ?, SYSDATE, ?, ?, 'Y')
+	</entry>
+
+	<entry key="insertAttachment">
+		INSERT INTO ATTACHMENT(FILE_NO, REF_FNO, ORIGIN_NAME, CHANGE_NAME, FILE_PATH, UPLOAD_DATE, STATUS)
+		VALUES(SEQ_ANO.NEXTVAL, SEQ_FNO.CURRVAL, ?, ?, ?, SYSDATE, 'Y')
+	</entry>
+	
+	<entry key="selectFleaMarket">
+   		SELECT FLEA_NO, FLEA_WRITER, USER_ID, FLEA_TITLE, FLEA_CONTENT, FLEA_PRICE, FLEA_TYPE  
+		FROM FLEA_MARKET  
+		JOIN MEMBER ON (USER_NO = FLEA_WRITER)  
+		WHERE FLEA_NO = ?  
+	</entry>
+
+	<entry key="selectAttachment">
+		SELECT FILE_NO, ORIGIN_NAME, CHANGE_NAME, FILE_PATH
+		  FROM ATTACHMENT
+		 WHERE REF_FNO = ?
+	</entry>
+	
+   <entry key = "selectListCount">
+   
+   SELECT COUNT(*) COUNT
+     FROM FLEA_MARKET
+     WHERE FLEA_TYPE = ?
+    
+   </entry>
+   
+   <entry key="updateFleaMarket">
+   	      		UPDATE FLEA_MARKET
+		   SET FLEA_TITLE = ?
+		       , FLEA_CONTENT = ?
+		       , FLEA_TYPE = ?
+               , FLEA_PRICE = ?
+               , FLEA_DATE = SYSDATE
+		 WHERE FLEA_NO = ?
+   </entry>
+   
+   	<entry key="updateAttachment">
+		UPDATE ATTACHMENT
+		   SET ORIGIN_NAME = ?
+		       , CHANGE_NAME = ?
+		       , FILE_PATH = ?
+		       , UPLOAD_DATE = SYSDATE
+		 WHERE FILE_NO = ?
+	</entry>
+	
+	<entry key="selectReplyList">
+	         SELECT REPLY_NO, REPLY_CONTENT, USER_ID, REPLY_DATE
+         FROM REPLY R
+         JOIN MEMBER ON (USER_NO = REPLY_WRITER)
+         WHERE R.STATUS = 'Y'
+          AND REPLY_FNO = ?
+	</entry>
+	
+	<entry key="insertReply">
+	          INSERT INTO REPLY VALUES(SEQ_RPNO.NEXTVAL, ?, ?, ?, SYSDATE, 'Y')
+	</entry>
+</properties>

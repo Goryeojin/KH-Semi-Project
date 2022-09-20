@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>일반게시판 관련 쿼리문들</comment>
+
+   <entry key = "selectBestSellerVoteList">
+   
+     
+     SELECT VOTE_COUNT, BOOK_TITLE, BOOK_AUTHOR, BOOK_PUBLISHER, BOOK_INTRO, BOOK_NO
+      FROM (
+         SELECT ROWNUM RNUM, A.* 
+         FROM(
+             SELECT BS.VOTE_COUNT, BOOK_TITLE, BOOK_AUTHOR, BOOK_PUBLISHER, BOOK_INTRO, B.BOOK_NO
+             FROM BOOK B
+             JOIN BEST_SELLER BS ON (B.BOOK_NO = BS.BOOK_NO)
+            ORDER 
+                 BY BOOK_NO) A)
+       WHERE
+          RNUM BETWEEN ? AND ?
+     
+   </entry>
+ 
+   <entry key = "updateBestSellerVoteList">
+   
+   UPDATE BEST_SELLER SET VOTE_COUNT = VOTE_COUNT +1
+   WHERE BOOK_NO = ?
+   
+   </entry>
+   
+   
+   <entry key = "selectListCount">
+   
+   SELECT COUNT(*) COUNT
+     FROM BEST_SELLER
+    
+   </entry>
+   
+   <entry key= "selectBestSellerEditorPickList">
+   
+        SELECT B.BOOK_NO, BS.EDITOR_CHOICE, BOOK_TITLE, BOOK_AUTHOR, BOOK_PUBLISHER, BOOK_INTRO
+     FROM BOOK B
+     JOIN BEST_SELLER BS ON B.BOOK_NO = BS.BOOK_NO
+     WHERE BS.EDITOR_CHOICE = 'Y'
+   
+   
+   </entry>
+   
+   <entry key="seBestSellerVoteList">
+   
+   SELECT VOTE_COUNT COUNT
+   FROM BEST_SELLER
+   WHERE BOOK_NO = ?
+   
+   </entry>
+   
+   
+</properties>

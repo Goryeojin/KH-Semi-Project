@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>리뷰 관련 쿼리문들</comment>
+	
+	<entry key="insertInquiry">
+		INSERT INTO QUESTION (Q_NO, Q_WRITER, Q_TITLE, Q_CONTENT, Q_DATE, STATUS, Q_ANSWER)
+		VALUES (SEQ_QNO.NEXTVAL, ?, ?, ?, SYSDATE, 'N', NULL)
+	</entry>
+	
+	<entry key="insertRequest">
+		INSERT INTO REQUEST (REQUEST_NO, REQUEST_WRITER, REQUEST_TITLE, REQUEST_CONTENT, REQUEST_DATE, STATUS)
+		VALUES (SEQ_RQNO.NEXTVAL, ?, ?, ?, SYSDATE, 'N')
+	</entry>
+	
+	<entry key="selectNoticeAll">
+SELECT NOTICE_NO, USER_NAME, NOTICE_TITLE, NOTICE_DATE, COUNT
+        FROM (
+            SELECT ROWNUM RNUM, A.* 
+        FROM (
+        SELECT NOTICE_NO, USER_NAME, NOTICE_TITLE, NOTICE_DATE, COUNT
+      FROM NOTICE N
+      JOIN MEMBER ON (NOTICE_WRITER = USER_NO)
+      WHERE N.STATUS = 'Y'
+      ORDER BY NOTICE_NO DESC) A)
+         WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="increaseNoticeCount">
+		UPDATE NOTICE
+		    SET COUNT = COUNT + 1
+		 WHERE NOTICE_NO = ?
+		    AND STATUS = 'Y'
+	</entry>
+	
+	<entry key="selectNotice">
+		SELECT NOTICE_NO, USER_NAME, NOTICE_TITLE, NOTICE_CONTENT, NOTICE_DATE, COUNT
+		FROM NOTICE 
+		JOIN MEMBER ON (NOTICE_WRITER = USER_NO)
+		WHERE NOTICE_NO = ?
+	</entry>
+	
+	   <entry key = "selectListCount">
+   
+   SELECT COUNT(*) COUNT
+     FROM NOTICE
+    
+   </entry>
+</properties>
